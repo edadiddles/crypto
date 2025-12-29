@@ -43,3 +43,12 @@ test "rotl32/rotr32 inverse" {
         );
     }
 }
+
+test "rotl32 edge cases" {
+    try testing.expectEqual(0x12345678, rotl32(0x12345678, 0));
+    try testing.expectEqual(0x2468acf0, rotl32(0x12345678, 1));
+    try testing.expectEqual(0x091a2b3c, rotl32(0x12345678, 31));
+    try testing.expectEqual(0x12345678, rotl32(0x12345678, 32));
+    try testing.expectEqual(0, rotl32(0, 5));
+    try testing.expectEqual(0xffffffff, rotl32(~@as(u32, 0), 5));
+}
