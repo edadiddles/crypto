@@ -1,6 +1,8 @@
 const std = @import("std");
 const testing = std.testing;
 
+
+//TODO: refactor code to use canonical crypto identity (~r & W-1)
 pub fn rotl32(x: u32, n: u32) u32 {
     const r: u5 = @intCast(n & 31);
     const s: u5 = @intCast((@as(u32, 32)-r) & 31);
