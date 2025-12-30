@@ -1,5 +1,6 @@
 const std = @import ("std");
 
+// TODO input checking and maybe return error
 pub fn load_u32_be(b: []const u8) u32 {
     return (@as(u32, b[0]) << 24) |
             (@as(u32, b[1]) << 16) |
