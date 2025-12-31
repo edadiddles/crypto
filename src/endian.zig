@@ -181,3 +181,36 @@ test "load_u64_le basic" {
     );
 }
 
+test "load_u64_le edge cases" {
+    const b0 = [_]u8{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    try std.testing.expectEqual(
+        @as(u64, 0x0000000000000000),
+        load_u64_le(&b0),
+    );
+
+    const b1 = [_]u8{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    try std.testing.expectEqual(
+        @as(u64, 0xffffffffffffffff),
+        load_u64_le(&b1),
+    );
+
+    const b2 = [_]u8{ 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55 };
+    try std.testing.expectEqual(
+        @as(u64, 0x55aa55aa55aa55aa),
+        load_u64_le(&b2),
+    );
+
+    const b3 = [_]u8{ 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa };
+    try std.testing.expectEqual(
+        @as(u64, 0xaa55aa55aa55aa55),
+        load_u64_le(&b3),
+    );
+
+    const b4 = [_]u8{ 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0xff };
+    try std.testing.expectEqual(
+        @as(u64, 0xefcdab9078563412),
+        load_u64_le(&b4),
+    );
+}
+
+
