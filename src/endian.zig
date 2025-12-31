@@ -52,9 +52,16 @@ pub fn store_u32_le(buf: []u8, x: u32) void {
     buf[2] = @intCast((x >> 16) & 0xff);
     buf[3] = @intCast((x >> 24) & 0xff);
 }
-pub fn store_u64_be(buf: []u8, x: u32) void {
+pub fn store_u64_be(buf: []u8, x: u64) void {
     std.debug.assert(buf.len >= 8);
-    _ = x;
+    buf[0] = @intCast((x >> 56) & 0xff);
+    buf[1] = @intCast((x >> 48) & 0xff);
+    buf[2] = @intCast((x >> 40) & 0xff);
+    buf[3] = @intCast((x >> 32) & 0xff);
+    buf[4] = @intCast((x >> 24) & 0xff);
+    buf[5] = @intCast((x >> 16) & 0xff);
+    buf[6] = @intCast((x >> 8) & 0xff);
+    buf[7] = @intCast((x >> 0) & 0xff);
 }
 pub fn store_u64_le(buf: []u8, x: u32) void {
     std.debug.assert(buf.len >= 8);
@@ -237,6 +244,15 @@ test "store_u32_le basic" {
     store_u32_le(&b, 0x12345678);
     try std.testing.expectEqual(
         [_]u8 { 0x78, 0x56, 0x34, 0x12 },
+        b,
+    );
+}
+
+test "store_u64_be basic" {
+    var b = [_]u8 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    store_u64_be(&b, 0x1234567890abcdef);
+    try std.testing.expectEqual(
+        [_]u8 { 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef },
         b,
     );
 }
