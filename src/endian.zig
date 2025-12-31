@@ -140,6 +140,39 @@ test "load_u64_be basic" {
     );
 }
 
+test "load_u64_be edge cases" {
+    const b0 = [_]u8{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    try std.testing.expectEqual(
+        @as(u64, 0x0000000000000000),
+        load_u64_be(&b0),
+    );
+
+    const b1 = [_]u8{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    try std.testing.expectEqual(
+        @as(u64, 0xffffffffffffffff),
+        load_u64_be(&b1),
+    );
+
+    const b2 = [_]u8{ 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55 };
+    try std.testing.expectEqual(
+        @as(u64, 0xaa55aa55aa55aa55),
+        load_u64_be(&b2),
+    );
+
+    const b3 = [_]u8{ 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa };
+    try std.testing.expectEqual(
+        @as(u64, 0x55aa55aa55aa55aa),
+        load_u64_be(&b3),
+    );
+
+    const b4 = [_]u8{ 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0xff };
+    try std.testing.expectEqual(
+        @as(u64, 0x1234567890abcdef),
+        load_u64_be(&b4),
+    );
+}
+
+
 test "load_u64_le basic" {
     const b = [_]u8{ 0xef, 0xcd, 0xab, 0x90, 0x78, 0x56, 0x34, 0x12 };
     try std.testing.expectEqual(
