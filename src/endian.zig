@@ -246,6 +246,43 @@ test "store_u32_be basic" {
     );
 }
 
+test "store_u32_be edge cases" {
+    var b0 = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b0, 0x00000000);
+    try std.testing.expectEqual(
+        [_]u8 { 0x00, 0x00, 0x00, 0x00 },
+        b0,
+    );
+    
+    var b1 = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b1, 0xffffffff);
+    try std.testing.expectEqual(
+        [_]u8 { 0xff, 0xff, 0xff, 0xff },
+        b1,
+    );
+
+    var b2 = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b2, 0xaa55aa55);
+    try std.testing.expectEqual(
+        [_]u8 { 0xaa, 0x55, 0xaa, 0x55 },
+        b2,
+    );
+    
+    var b3 = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b3, 0x55aa55aa);
+    try std.testing.expectEqual(
+        [_]u8 { 0x55, 0xaa, 0x55, 0xaa },
+        b3,
+    );
+    
+    var b4 = [_]u8 { 0x00, 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b4, 0x12345678);
+    try std.testing.expectEqual(
+        [_]u8 { 0x12, 0x34, 0x56, 0x78, 0x00 },
+        b4,
+    );
+}
+
 test "store_u32_le basic" {
     var b = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
     store_u32_le(&b, 0x12345678);
