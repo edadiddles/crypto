@@ -1,6 +1,5 @@
 const std = @import ("std");
 
-// TODO input checking and maybe return error
 pub fn load_u32_be(b: []const u8) u32 {
     std.debug.assert(b.len >= 4);
     return (@as(u32, b[0]) << 24) |
@@ -38,17 +37,25 @@ pub fn load_u64_le(b: []const u8) u64 {
             (@as(u64, b[0]) << 0);
 }
 
-pub fn store_u32_be() []u8 {
-    return []u8{};
+pub fn store_u32_be(buf: []u8, x: u32) void {
+    std.debug.assert(buf.len >= 4);
+    buf[0] = @intCast((x >> 24) & 0xff);
+    buf[1] = @intCast((x >> 16) & 0xff);
+    buf[2] = @intCast((x >> 8) & 0xff);
+    buf[3] = @intCast((x >> 0) & 0xff);
 }
-pub fn store_u32_le() []u8 {
-    return []u8{};
+
+pub fn store_u32_le(buf: []u8, x: u32) void {
+    std.debug.assert(buf.len >= 4);
+    _ = x;
 }
-pub fn store_u64_be() []u8 {
-    return []u8{};
+pub fn store_u64_be(buf: []u8, x: u32) void {
+    std.debug.assert(buf.len >= 8);
+    _ = x;
 }
-pub fn store_u64_le() []u8 {
-    return []u8{};
+pub fn store_u64_le(buf: []u8, x: u32) void {
+    std.debug.assert(buf.len >= 8);
+    _ = x;
 }
 
 
@@ -213,4 +220,11 @@ test "load_u64_le edge cases" {
     );
 }
 
-
+test "store_u32_be basic" {
+    var b = [_]u8 { 0x00, 0x00, 0x00, 0x00 };
+    store_u32_be(&b, 0x12345678);
+    try std.testing.expectEqual(
+        [_]u8 {0x12, 0x34, 0x56, 0x78 },
+        b,
+    );
+}
