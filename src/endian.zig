@@ -2,18 +2,21 @@ const std = @import ("std");
 
 // TODO input checking and maybe return error
 pub fn load_u32_be(b: []const u8) u32 {
+    std.debug.assert(b.len >= 4);
     return (@as(u32, b[0]) << 24) |
             (@as(u32, b[1]) << 16) |
             (@as(u32, b[2]) << 8) |
             (@as(u32, b[3]) << 0);
 }
 pub fn load_u32_le(b: []const u8) u32 {
+    std.debug.assert(b.len >= 4);
     return (@as(u32, b[3]) << 24) |
             (@as(u32, b[2]) << 16) |
             (@as(u32, b[1]) << 8) |
             (@as(u32, b[0]) << 0);
 }
 pub fn load_u64_be(b: []const u8) u64 {
+    std.debug.assert(b.len >= 8);
     return (@as(u64, b[0]) << 56) |
             (@as(u64, b[1]) << 48) |
             (@as(u64, b[2]) << 40) |
@@ -24,6 +27,7 @@ pub fn load_u64_be(b: []const u8) u64 {
             (@as(u64, b[7]) << 0);
 }
 pub fn load_u64_le(b: []const u8) u64 {
+    std.debug.assert(b.len >= 8);
     return (@as(u64, b[7]) << 56) |
             (@as(u64, b[6]) << 48) |
             (@as(u64, b[5]) << 40) |
@@ -53,6 +57,38 @@ test "load_u32_be basic" {
     try std.testing.expectEqual(
         @as(u32, 0x12345678),
         load_u32_be(&b),
+    );
+}
+
+test "load_u32_be edge cases" {
+    const b0 = [_]u8{ 0x00, 0x00, 0x00, 0x00 };
+    try std.testing.expectEqual(
+        @as(u32, 0x00000000),
+        load_u32_be(&b0),
+    );
+
+    const b1 = [_]u8{ 0xff, 0xff, 0xff, 0xff };
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        load_u32_be(&b1),
+    );
+
+    const b2 = [_]u8{ 0xaa, 0x55, 0xaa, 0x55 };
+    try std.testing.expectEqual(
+        @as(u32, 0xaa55aa55),
+        load_u32_be(&b2),
+    );
+
+    const b3 = [_]u8{ 0x55, 0xaa, 0x55, 0xaa };
+    try std.testing.expectEqual(
+        @as(u32, 0x55aa55aa),
+        load_u32_be(&b3),
+    );
+
+    const b4 = [_]u8{ 0x12, 0x34, 0x56, 0x78, 0x90 };
+    try std.testing.expectEqual(
+        @as(u32, 0x12345678),
+        load_u32_be(&b4),
     );
 }
 
