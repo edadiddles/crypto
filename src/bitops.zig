@@ -129,3 +129,15 @@ test "ch32 basic" {
         ch32(0xffffffff, 0xdeadbeef, 0x12345678),
     );
 }
+
+test "ch32 masking" {
+    try std.testing.expectEqual(
+        @as(u32, 0xaaaaaaaa),
+        ch32(0xaaaaaaaa, 0xffffffff, 0x000000000),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0x55555555),
+        ch32(0xaaaaaaaa, 0x000000000, 0xffffffff),
+    );
+}
