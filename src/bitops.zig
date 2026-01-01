@@ -118,3 +118,14 @@ test "rotl64 edge cases" {
     try testing.expectEqual(0xffffffffffffffff, rotl64(~@as(u64, 0), 5));
 }
 
+test "ch32 basic" {
+    try std.testing.expectEqual(
+        @as(u32, 0x12345678),
+        ch32(0x00000000, 0xffffffff, 0x12345678),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0xdeadbeef),
+        ch32(0xffffffff, 0xdeadbeef, 0x12345678),
+    );
+}
