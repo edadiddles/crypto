@@ -27,6 +27,29 @@ pub fn rotr64(x: u64, n: u64) u64 {
     return (x >> r) | (x << s);
 }
 
+pub fn ch32(x: u32, y: u32, z: u32) u32 {
+    return (x & y) ^ (~x & z);
+}
+
+pub fn maj32(x: u32, y: u32, z: u32) u32 {
+    return (x & y) ^ (x & z) ^ (y & z);
+}
+
+pub fn par32(x: u32, y: u32, z: u32) u32 {
+    return x ^ y ^ z;
+}
+
+pub fn ch64(x: u64, y: u64, z: u64) u64 {
+    return (x & y) ^ (~x & z);
+}
+
+pub fn maj64(x: u64, y: u64, z: u64) u64 {
+    return (x & y) ^ (x & z) ^ (y & z);
+}
+
+pub fn par64(x: u64, y: u64, z: u64) u64 {
+    return x ^ y ^ z;
+}
 
 test "rotl32 basic" {
     try std.testing.expectEqual(
