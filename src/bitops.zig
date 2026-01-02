@@ -148,3 +148,54 @@ test "ch32 structural" {
         ch32(0xaaaaaaaa, 0xaaaaaaaa, 0x55555555),
     );
 }
+
+test "maj32 basic" {
+    try std.testing.expectEqual(
+        @as(u32, 0x00000000),
+        maj32(0x00000000, 0x00000000, 0x00000000),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        maj32(0xffffffff, 0xffffffff, 0xffffffff),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0x12345678),
+        maj32(0x12345678, 0x12345678, 0xdeadbeef),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0xdeadbeef),
+        maj32(0x12345678, 0xdeadbeef, 0xdeadbeef),
+    );
+}
+
+test "maj32 alternating" {
+    try std.testing.expectEqual(
+        @as(u32, 0xaaaaaaaa),
+        maj32(0xaaaaaaaa, 0x55555555, 0xaaaaaaaa),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0x55555555),
+        maj32(0x55555555, 0x55555555, 0xaaaaaaaa),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0xaaaaaaaa),
+        maj32(0xaaaaaaaa, 0xcccccccc, 0xaaaaaaaa),
+    );
+}
+
+test "maj32 mixed" {
+    try std.testing.expectEqual(
+        @as(u32, 0xe8e8e8e8),
+        maj32(0xaaaaaaaa, 0xcccccccc, 0xf0f0f0f0),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        maj32(0xaaaaaaaa, 0x55555555, 0xffffffff),
+    );
+}
