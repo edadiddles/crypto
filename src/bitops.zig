@@ -199,3 +199,34 @@ test "maj32 mixed" {
         maj32(0xaaaaaaaa, 0x55555555, 0xffffffff),
     );
 }
+
+test "par32 basic" {
+    try std.testing.expectEqual(
+        @as(u32, 0x00000000),
+        par32(0x00000000, 0x00000000, 0x00000000),
+    );
+    
+    try std.testing.expectEqual(
+        @as(u32, 0x12345678),
+        par32(0x12345678, 0x00000000, 0x00000000),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0x00000000),
+        par32(0x12345678, 0x12345678, 0x00000000),
+    );
+}
+
+test "par32 alternating" {
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        par32(0xaaaaaaaa, 0x55555555, 0x00000000),
+    );
+}
+
+test "par32 linearity" {
+    try std.testing.expectEqual(
+        true,
+        par32(0x12345678^0xdeadbeef, 0xa5a5a5a5, 0x5a5a5a5a) == par32(0x12345678, 0xa5a5a5a5, 0x5a5a5a5a) ^ 0xdeadbeef,
+    );
+}
