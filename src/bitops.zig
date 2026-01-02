@@ -141,3 +141,10 @@ test "ch32 masking" {
         ch32(0xaaaaaaaa, 0x000000000, 0xffffffff),
     );
 }
+
+test "ch32 structural" {
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        ch32(0xaaaaaaaa, 0xaaaaaaaa, 0x55555555),
+    );
+}
