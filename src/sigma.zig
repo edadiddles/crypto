@@ -84,3 +84,35 @@ test "small_sigma1_32 alternating patterns" {
         @as(u32, 0x00000000) != small_sigma1_32(0x55555555),
     );
 }
+
+test "big_sigma0_32 basic" {
+    try std.testing.expectEqual(
+        @as(u32, 0x00000000),
+        big_sigma0_32(0x00000000),
+    );
+ 
+    try std.testing.expectEqual(
+        @as(u32, 0xffffffff),
+        big_sigma0_32(0xffffffff),
+    );
+
+    try std.testing.expectEqual(
+        @as(u32, 0x40080400),
+        big_sigma0_32(0x00000001),
+    );
+    
+    try std.testing.expectEqual(
+        @as(u32, 0x20040200),
+        big_sigma0_32(0x80000000),
+    );
+}
+
+test "big_sigma0_32 alternating patterns" {
+    try std.testing.expect(
+        @as(u32, 0x00000000) != big_sigma0_32(0xaaaaaaaa),
+    );
+    
+    try std.testing.expect(
+        @as(u32, 0x00000000) != big_sigma0_32(0x55555555),
+    );
+}
