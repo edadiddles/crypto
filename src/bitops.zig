@@ -3,6 +3,8 @@ const testing = std.testing;
 
 
 //TODO: refactor code to use canonical crypto identity (~r & W-1)
+//TODO: validate correctness. chatGPT says correct but I'm not 100% sure
+// Hand calculating appears to be left shifted 1 bit (32-r doesn't agree with ~r)
 pub fn rotl32(x: u32, n: u32) u32 {
     const r: u5 = @intCast(n & 31);
     const s: u5 = @intCast((@as(u32, 32)-r) & 31);
