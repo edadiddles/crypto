@@ -22,6 +22,11 @@ const K = [_]u32{
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
+const IV = [_] u32 {
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+};
+
 fn schedule(block: []const u8, W: *[64]u32) void {
     for (0..16) |i| {
         W[i] = endian.load_u32_be(block[i*4..][0..4]);
@@ -69,20 +74,35 @@ pub fn compress(state: *[8]u32, block: []const u8) void {
     state[7] +%= h;
 }
 
-test "compress zero block sanity" {
-    const block: [64]u8 = [_]u8{0}**64;
-    var state: [8]u32 = [_]u32{1,2,3,4,5,6,7,8};
+test "compress zero block sanity check with Known Value test" {
+    const block: [64]u8 = .{0x80} ++ .{0x00}**63;
+    var state: [8]u32 = IV;
     compress(&state, &block);
-    try std.testing.expect(!std.mem.eql(u32, &[_]u32{1,2,3,4,5,6,7,8}, &state));
+    try std.testing.expect(!std.mem.eql(u32, &IV, &state));
+    try std.testing.expectEqualSlices(
+        u32,
+        &[_]u32 {
+            0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924,
+            0x27ae41e4, 0x649b934c, 0xa495991b, 0x7852b855,
+        },
+        &state,
+    );
 }
 
 test "compress determinism" {
-    const block: [64]u8 = .{'H','e','l','l','o',' ','w','o','r','l','d'} ++ .{0}**53;
-    var state1: [8]u32 = [_]u32{1,2,3,4,5,6,7,8};
-    var state2: [8]u32 = [_]u32{1,2,3,4,5,6,7,8};
+    const block: [64]u8 = .{'H','e','l','l','o',' ','w','o','r','l','d', 0x80 } ++ .{0}**44 ++ .{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x58 };
+    var state1: [8]u32 = IV;
+    var state2: [8]u32 = IV;
     compress(&state1, &block);
     compress(&state2, &block);
     try std.testing.expectEqualSlices(u32, &state1, &state2);
+    try std.testing.expectEqualSlices(u32,
+        &[_]u32 {
+            0x64ec88ca, 0x00b268e5, 0xba1a3567, 0x8a1b5316,
+            0xd212f4f3, 0x66b24772, 0x32534a8a, 0xeca37f3c,
+        },
+        &state1,
+    );
 }
 
 test "schedule determinism" {
@@ -105,4 +125,16 @@ test "schedule partial correctness" {
     try std.testing.expectEqual(0x61626380, W[0]);
     try std.testing.expectEqual(0x00000018, W[15]);
     try std.testing.expectEqual(0x61626380, W[16]);
+}
+
+test "schedule does not mutate block" {
+    var block = [_]u8{0} ** 64;
+    block[0] = 0x80;
+
+    const original = block;
+
+    var W: [64]u32 = undefined;
+    schedule(&block, &W);
+
+    try std.testing.expectEqualSlices(u8, &original, &block);
 }
