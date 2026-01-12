@@ -22,7 +22,7 @@ const K = [_]u32{
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
-const IV = [_] u32 {
+const IV = [_]u32 {
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 };
@@ -72,6 +72,64 @@ pub fn compress(state: *[8]u32, block: []const u8) void {
     state[5] +%= f;
     state[6] +%= g;
     state[7] +%= h;
+}
+
+pub fn sha256(input: []const u8) []u32 {
+    const padding: [1]u8 = .{0x80};
+    var bit_size: [8]u8 = .{0}**8;
+    const num_bytes = input.len + padding.len + bit_size.len;
+    const num_blks = (num_bytes/64) + 1;
+
+    var blks: [256][64]u8 = undefined;
+    var bit_cnt: u64 = 0;
+    var blk_cnt: usize = 0;
+    {
+        var blk: [64]u8 = .{0}**64;
+        var blk_idx: usize = 0;
+        for (input, 1..) |m, k| {
+            if (k % 64 == 0) {
+                blks[blk_cnt] = blk;
+                blk_cnt += 1;
+                blk_idx = 0;
+                blk = .{0}**64;
+            }
+            blk[blk_idx] = m;
+            bit_cnt+=8; // count bits
+            blk_idx+=1;
+            //bit_size += 1;
+        }
+
+        blk[blk_idx] = padding[0];
+
+
+        bit_size = .{
+            @intCast(bit_cnt >> 56 & 255),
+            @intCast(bit_cnt >> 48 & 255),
+            @intCast(bit_cnt >> 40 & 255),
+            @intCast(bit_cnt >> 32 & 255),
+            @intCast(bit_cnt >> 24 & 255),
+            @intCast(bit_cnt >> 16 & 255),
+            @intCast(bit_cnt >> 8 & 255),
+            @intCast(bit_cnt >> 0 & 255),
+        };
+        for (bit_size,0..) |b,k| {
+            blk[56+k] = b;
+        }
+        blks[blk_cnt] = blk;
+        blk_cnt += 1;
+        std.debug.print("{any}\n", .{blk});
+    }
+
+    var state: [8]u32 = IV;
+    for (blks, 0..) |blk, k| {
+        if (k >= num_blks) {
+            std.debug.print("{}\n", .{k});
+            break;
+        }
+        compress(&state, &blk);
+    }
+
+    return &state;
 }
 
 test "compress zero block sanity check with Known Value test" {
@@ -137,4 +195,39 @@ test "schedule does not mutate block" {
     schedule(&block, &W);
 
     try std.testing.expectEqualSlices(u8, &original, &block);
+}
+
+test "sha256 Known Value Tests" {
+    try std.testing.expectEqualSlices(
+        u32,
+        &[8]u32{
+            0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924,
+            0x27ae41e4, 0x649b934c, 0xa495991b, 0x7852b855,
+        },
+        sha256(""),
+    );
+    try std.testing.expectEqualSlices(
+        u32,
+        &[8]u32{
+            0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223,
+            0xb00361a3, 0x96177a9c, 0xb410ff61, 0xf20015ad,
+        },
+        sha256("abc"),
+    );
+    try std.testing.expectEqualSlices(
+        u32,
+        &[8]u32{
+            0xa591a6d4, 0x0bf42040, 0x4a011733, 0xcfb7b190,
+            0xd62c65bf, 0x0bcda32b, 0x57b277d9, 0xad9f146e,
+        },
+        sha256("Hello World"),
+    );
+    //try std.testing.expectEqualSlices(
+    //    u32,
+    //    &[8]u32{
+    //        0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039,
+    //        0xa33ce459, 0x64ff2167, 0xf6ecedd4, 0x19db06c1,
+    //    },
+    //    sha256("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+    //);
 }
