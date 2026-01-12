@@ -101,6 +101,12 @@ pub fn sha256(input: []const u8) []u32 {
 
         blk[blk_idx] = padding[0];
 
+        blks[blk_cnt] = blk;
+        blk_cnt += 1;
+
+        if (blk_cnt < num_blks) {
+            blks[blk_cnt] = .{0}**64;
+        }
 
         bit_size = .{
             @intCast(bit_cnt >> 56 & 255),
@@ -113,17 +119,13 @@ pub fn sha256(input: []const u8) []u32 {
             @intCast(bit_cnt >> 0 & 255),
         };
         for (bit_size,0..) |b,k| {
-            blk[56+k] = b;
+            blks[num_blks-1][56+k] = b;
         }
-        blks[blk_cnt] = blk;
-        blk_cnt += 1;
-        std.debug.print("{any}\n", .{blk});
     }
 
     var state: [8]u32 = IV;
     for (blks, 0..) |blk, k| {
         if (k >= num_blks) {
-            std.debug.print("{}\n", .{k});
             break;
         }
         compress(&state, &blk);
@@ -222,12 +224,12 @@ test "sha256 Known Value Tests" {
         },
         sha256("Hello World"),
     );
-    //try std.testing.expectEqualSlices(
-    //    u32,
-    //    &[8]u32{
-    //        0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039,
-    //        0xa33ce459, 0x64ff2167, 0xf6ecedd4, 0x19db06c1,
-    //    },
-    //    sha256("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
-    //);
+    try std.testing.expectEqualSlices(
+        u32,
+        &[8]u32{
+            0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039,
+            0xa33ce459, 0x64ff2167, 0xf6ecedd4, 0x19db06c1,
+        },
+        sha256("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+    );
 }
