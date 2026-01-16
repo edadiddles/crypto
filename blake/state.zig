@@ -4,8 +4,10 @@ const BLOCK_SIZE = 64;
 
 pub const Blake2sState = struct {
     h: [8]u32,
-    t: u64,
-    f: u64,
+    t0: u32,
+    t1: u32,
+    f0: u32,
+    f1: u32,
     buf: [BLOCK_SIZE]u8,
     buf_len: usize,
     out_len: u8,
@@ -16,8 +18,10 @@ pub const Blake2sState = struct {
             self.h[i] = params.IV[i] ^ param_words[i];
         }
 
-        self.t = 0;
-        self.f = 0;
+        self.t0 = 0;
+        self.t1 = 0;
+        self.f0 = 0;
+        self.f1 = 0;
         self.buf = .{0}**BLOCK_SIZE;
         self.buf_len = 0;
         self.out_len = blake2sParams.digest_length;
