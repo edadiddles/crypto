@@ -1,7 +1,7 @@
 const std = @import("std");
-const endian = @import("cryptops/endian.zig");
+const endian = @import("../cryptops/endian.zig");
 const sigma = @import("sigma.zig");
-const boolops = @import("cryptops/boolops.zig");
+const boolops = @import("../cryptops/boolops.zig");
 
 const K = [_]u32{
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
