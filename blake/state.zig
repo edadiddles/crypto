@@ -12,7 +12,7 @@ pub const Blake2sState = struct {
     buf_len: usize,
     out_len: u8,
 
-    fn init(self: *Blake2sState, blake2sParams: *const params.Blake2sParams) void {
+    pub fn init(self: *Blake2sState, blake2sParams: *const params.Blake2sParams) void {
         const param_words = blake2sParams.as_words();
         for(0..8) |i| {
             self.h[i] = params.IV[i] ^ param_words[i];
@@ -26,4 +26,11 @@ pub const Blake2sState = struct {
         self.buf_len = 0;
         self.out_len = blake2sParams.digest_length;
     }
+
+    pub fn increment_bytes(self: *Blake2sState, num_bytes: u32) void {
+        const res = @addWithOverflow(self.t0.*, num_bytes);
+        self.t0.* += res[0];
+        self.t1.* += @intFromBool(res[1]);
+    }
+
 };
