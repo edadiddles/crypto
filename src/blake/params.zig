@@ -25,7 +25,9 @@ pub const Blake2sParams = packed struct {
     node_offset: u64,
     node_depth: u8,
     inner_length: u8,
-    reserved: [14]u8,
+    reserved_0: u64,
+    reserved_1: u32,
+    reserved_2: u16,
 
     pub fn init(digest_len: u8, key_len: u8) Blake2sParams {
         return .{
@@ -37,7 +39,9 @@ pub const Blake2sParams = packed struct {
             .node_offset = 0,
             .node_depth = 0,
             .inner_length = 0,
-            .reserved = [_]u8{0}**14,
+            .reserved_0 = 0,
+            .reserved_1 = 0,
+            .reserved_2 = 0,
         };
     }
 
