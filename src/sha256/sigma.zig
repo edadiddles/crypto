@@ -1,5 +1,5 @@
 const std = @import("std");
-const bitops = @import("../cryptops/bitops.zig");
+const bitops = @import("bitops");
 
 pub fn small_sigma0_32(x: u32) u32 {
     return bitops.rotr32(x, 7) ^ bitops.rotr32(x, 18) ^ x >> 3;
