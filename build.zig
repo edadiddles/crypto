@@ -42,6 +42,35 @@ pub fn build(b: *std.Build) void {
     
     lib_blake2s.root_module.addImport("bitops", mod_bitops);
 
+
+    const test_step = b.step("test", "Run unit tests");
+    const test_blake2s_exe = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/blake/blake2s.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    const test_sha256_exe = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/sha256/sha256.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+
+    test_blake2s_exe.root_module.addImport("bitops", mod_bitops);
+
+    const test_run_blake2s = b.addRunArtifact(test_blake2s_exe);
+    test_step.dependOn(&test_run_blake2s.step);
+
+    test_sha256_exe.root_module.addImport("bitops", mod_bitops);
+    test_sha256_exe.root_module.addImport("boolops", mod_boolops);
+    test_sha256_exe.root_module.addImport("endian", mod_endian);
+
+    const test_run_sha256 = b.addRunArtifact(test_sha256_exe);
+    test_step.dependOn(&test_run_sha256.step);
+    
     b.installArtifact(lib_sha256);
     b.installArtifact(lib_blake2s);
 }

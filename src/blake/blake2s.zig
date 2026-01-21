@@ -11,10 +11,11 @@ pub const Blake2s = struct {
 
         update(&state, input);
 
-        var out: [32]u8 = undefined;
-        finalize(&state, &out);
+        var buf: [32]u8 = undefined;
+        finalize(&state, &buf);
 
-        return std.fmt.bufPrint(&out, "{x}", .{out[0..state.out_len]});
+        var out: [64]u8 = undefined;
+        return try std.fmt.bufPrint(&out, "{x}", .{buf[0..state.out_len]});
     }
 
     fn init(state: *Blake2sState, digest_len: u8, key: ?[]const u8) void {
@@ -47,10 +48,10 @@ pub const Blake2s = struct {
         compress(state, &state.buf);
         
         for (state.h, 0..) |h, k| {
-            out[k] = @intCast(h & 0xf);
-            out[k+1] = @intCast(h >> 8 & 0xf);
-            out[k+2] = @intCast(h >> 16 & 0xf);
-            out[k+3] = @intCast(h >> 24 & 0xf);
+            out[4*k] = @intCast(h & 0xff);
+            out[4*k+1] = @intCast(h >> 8 & 0xff);
+            out[4*k+2] = @intCast(h >> 16 & 0xff);
+            out[4*k+3] = @intCast(h >> 24 & 0xff);
         }
         
     }
@@ -59,17 +60,17 @@ pub const Blake2s = struct {
 test "hash empty string" {
     const input = "";
     const expected = "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
-    try std.testing.expectEqual(Blake2s.hash(input), expected);
+    try std.testing.expectEqualStrings(try Blake2s.hash(input), expected);
 }
 
 test "hash abc" {
     const input = "abc";
     const expected = "508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982";
-    try std.testing.expectEqual(Blake2s.hash(input), expected);
+    try std.testing.expectEqualStrings(try Blake2s.hash(input), expected);
 }
 
 test "hash short ascii string" {
     const input = "The quick brown fox jumps over the lazy dog";
     const expected = "606beeec743ccbeff6cbcdf5d5302aa855c256c29b88c8ed331ea1a6bf3c8812";
-    try std.testing.expectEqual(Blake2s.hash(input), expected);
+    try std.testing.expectEqualStrings(try Blake2s.hash(input), expected);
 }
