@@ -18,10 +18,10 @@ pub const Poly1305State = struct {
             .buf_len = 0,
         };
 
-        const t0 = std.mem.readIntLittle(u32, key[0..4]);
-        const t1 = std.mem.readIntLittle(u32, key[4..8]);
-        const t2 = std.mem.readIntLittle(u32, key[8..12]);
-        const t3 = std.mem.readIntLittle(u32, key[12..16]);
+        const t0 = std.mem.readInt(u32, key[0..4], .little);
+        const t1 = std.mem.readInt(u32, key[4..8], .little);
+        const t2 = std.mem.readInt(u32, key[8..12], .little);
+        const t3 = std.mem.readInt(u32, key[12..16], .little);
 
         // Clamp r
         st.r[0] = t0 & 0x3fffffff;
@@ -31,14 +31,14 @@ pub const Poly1305State = struct {
         st.r[4] = (t3 >> 8) & 0x00ffffff;
 
         // Load s
-        st.s[0] = std.mem.readIntLittle(u32, key[16..20]);
-        st.s[1] = std.mem.readIntLittle(u32, key[20..24]);
-        st.s[2] = std.mem.readIntLittle(u32, key[24..28]);
-        st.s[3] = std.mem.readIntLittle(u32, key[28..32]);
+        st.s[0] = std.mem.readInt(u32, key[16..20], .little);
+        st.s[1] = std.mem.readInt(u32, key[20..24], .little);
+        st.s[2] = std.mem.readInt(u32, key[24..28], .little);
+        st.s[3] = std.mem.readInt(u32, key[28..32], .little);
         return st;
     }
 
-    pub fn incrementCounter(self: Poly1305State, bytes: usize) void {
+    pub fn incrementCounter(self: *Poly1305State, bytes: usize) void {
         self.buf_len += bytes;
     }
 };

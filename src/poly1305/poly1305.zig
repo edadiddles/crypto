@@ -65,16 +65,20 @@ const Poly1305 = struct {
 
         math.finalizeReduce(&self.state.h);
 
-        var f: u64 = 0;
-        f = (@as(u64, self.state.h[0])) |
-            (@as(u64, self.state.h[1]) << 26) |
-            (@as(u64, self.state.h[2]) << 52) |
-            (@as(u64, self.state.h[3]) << 78) |
-            (@as(u64, self.state.h[4]) << 104);
+        var f0 = self.state.h[0] | (self.state.h[1] << 26);
+        var f1 = (self.state.h[1] >> 6) | (self.state.h[2] << 20);
+        var f2 = (self.state.h[2] >> 12) | (self.state.h[3] << 14);
+        var f3 = (self.state.h[3] >> 18) | (self.state.h[4] << 8);
+ 
+        f0 +%= self.state.s[0];
+        f1 +%= self.state.s[1];
+        f2 +%= self.state.s[2];
+        f3 +%= self.state.s[3];
 
-        f +%= self.state.s;
-
-        std.mem.writeInt(u128, out, @intCast(f), .little);
+        std.mem.writeInt(u32, out[0..4], f0, .little);
+        std.mem.writeInt(u32, out[4..8], f1, .little);
+        std.mem.writeInt(u32, out[8..12], f2, .little);
+        std.mem.writeInt(u32, out[12..16], f3, .little);
     }
 };
 
@@ -97,5 +101,5 @@ test "Empty message" {
     var poly1305 = Poly1305.init(key);
     poly1305.update(msg);
     poly1305.finalize(&out);
-    std.testing.expectEqualSlices(expected, out);
+    try std.testing.expectEqualSlices(u8, &expected, &out);
 }
