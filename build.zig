@@ -24,6 +24,16 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    const lib_poly1305 = b.addLibrary(.{
+        .name = "crypto_poly1305",
+        .linkage = .static,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/poly1305/poly1305.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+
     const mod_bitops = b.createModule(.{
         .root_source_file = b.path("src/cryptops/bitops.zig"),
     });
@@ -58,6 +68,13 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
+    const test_poly1305_exe = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/poly1305/poly1305.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
 
     test_blake2s_exe.root_module.addImport("bitops", mod_bitops);
 
@@ -70,7 +87,11 @@ pub fn build(b: *std.Build) void {
 
     const test_run_sha256 = b.addRunArtifact(test_sha256_exe);
     test_step.dependOn(&test_run_sha256.step);
+
+    const test_run_poly1305 = b.addRunArtifact(test_poly1305_exe);
+    test_step.dependOn(&test_run_poly1305.step);
     
     b.installArtifact(lib_sha256);
     b.installArtifact(lib_blake2s);
+    b.installArtifact(lib_poly1305);
 }
