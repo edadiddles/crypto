@@ -24,11 +24,11 @@ pub const Poly1305State = struct {
         const t3 = std.mem.readInt(u32, key[12..16], .little);
 
         // Clamp r
-        st.r[0] = t0 & 0x3fffffff;
-        st.r[1] = ((t0 >> 26) | (t1 << 6)) & 0x3fffff03;
-        st.r[2] = ((t1 >> 20) | (t2 << 12)) & 0x3fffc0ff;
-        st.r[3] = ((t2 >> 14) | (t3 << 18)) & 0x3f03ffff;
-        st.r[4] = (t3 >> 8) & 0x00ffffff;
+        st.r[0] = t0 & 0x3ffffff;
+        st.r[1] = ((t0 >> 26) | (t1 << 6)) & 0x3ffff03;
+        st.r[2] = ((t1 >> 20) | (t2 << 12)) & 0x3ffc0ff;
+        st.r[3] = ((t2 >> 14) | (t3 << 18)) & 0x3f03fff;
+        st.r[4] = (t3 >> 8) & 0x00fffff;
 
         // Load s
         st.s[0] = std.mem.readInt(u32, key[16..20], .little);
@@ -39,7 +39,7 @@ pub const Poly1305State = struct {
     }
 
     pub fn incrementCounter(self: *Poly1305State, bytes: usize) void {
-        self.buf_len += bytes;
+        self.buf_len = bytes;
     }
 };
 

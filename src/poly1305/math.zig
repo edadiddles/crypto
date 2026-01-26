@@ -18,10 +18,10 @@ pub fn mulAcc(h: *[LIMBS]u32, r: *[LIMBS]u32) void {
     const r3 = @as(u64, r[3]);
     const r4 = @as(u64, r[4]);
 
-    const s1 = r1 * LIMBS;
-    const s2 = r2 * LIMBS;
-    const s3 = r3 * LIMBS;
-    const s4 = r4 * LIMBS;
+    const s1 = r1 * 5;
+    const s2 = r2 * 5;
+    const s3 = r3 * 5;
+    const s4 = r4 * 5;
     
     const h0 = @as(u64, h[0]);
     const h1 = @as(u64, h[1]);
@@ -35,11 +35,11 @@ pub fn mulAcc(h: *[LIMBS]u32, r: *[LIMBS]u32) void {
     const d3 = h0*r3 + h1*r2 + h2*r1 + h3*r0 + h4*s4;
     const d4 = h0*r4 + h1*r3 + h2*r2 + h3*r1 + h4*r0;
 
-    h[0] = @intCast(d0 & 0x0000ffff);
-    h[1] = @intCast(d1 & 0x0000ffff);
-    h[2] = @intCast(d2 & 0x0000ffff);
-    h[3] = @intCast(d3 & 0x0000ffff);
-    h[4] = @intCast(d4 & 0x0000ffff);
+    h[0] = @intCast(d0 & LIMB_MASK);
+    h[1] = @intCast(d1 & LIMB_MASK);
+    h[2] = @intCast(d2 & LIMB_MASK);
+    h[3] = @intCast(d3 & LIMB_MASK);
+    h[4] = @intCast(d4 & LIMB_MASK);
 }
 
 pub fn reduce(h: *[LIMBS]u32) void {

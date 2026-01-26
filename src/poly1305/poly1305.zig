@@ -29,14 +29,14 @@ const Poly1305 = struct {
 
             if (self.state.buf_len == 16) {
                 self.state.incrementCounter(16);
-                block.processBlock(&self.state, &self.state.buf, false);
+                block.processBlock(&self.state, &self.state.buf);
                 self.state.buf_len = 0;
             }
         }
 
         while (input.len >= 16) {
             self.state.incrementCounter(16);
-            block.processBlock(&self.state, &input[0..16].*, false);
+            block.processBlock(&self.state, &input[0..16].*);
             input = input[16..];
         }
 
@@ -52,28 +52,35 @@ const Poly1305 = struct {
     pub fn finalize(self: *Poly1305, out: *[16]u8) void {
         if (self.state.buf_len > 0) {
             self.state.buf[self.state.buf_len] = 1;
-            for (self.state.buf_len + 1 .. 16) |i| {
+            for (self.state.buf_len+1..16) |i| {
                 self.state.buf[i] = 0;
             }
 
             self.state.incrementCounter(self.state.buf_len);
-            block.processBlock(&self.state, &self.state.buf, true);
-        } else {
-            self.state.incrementCounter(0);
-            block.processBlock(&self.state, &[_]u8{0}**16, true);
+            block.processBlock(&self.state, &self.state.buf);
         }
-
         math.finalizeReduce(&self.state.h);
 
         var f0 = self.state.h[0] | (self.state.h[1] << 26);
         var f1 = (self.state.h[1] >> 6) | (self.state.h[2] << 20);
         var f2 = (self.state.h[2] >> 12) | (self.state.h[3] << 14);
         var f3 = (self.state.h[3] >> 18) | (self.state.h[4] << 8);
- 
-        f0 +%= self.state.s[0];
-        f1 +%= self.state.s[1];
-        f2 +%= self.state.s[2];
-        f3 +%= self.state.s[3];
+
+        var carry: u1 = 0;
+        var r = @addWithOverflow(f0, self.state.s[0]);
+        f0 = r[0];
+        carry = r[1];
+       
+        r = @addWithOverflow(f1, self.state.s[1]+carry);
+        f1 = r[0];
+        carry = r[1];
+        
+        r = @addWithOverflow(f2, self.state.s[2]+carry);
+        f2 = r[0];
+        carry = r[1];
+        
+        r = @addWithOverflow(f3, self.state.s[3]+carry);
+        f3 = r[0];
 
         std.mem.writeInt(u32, out[0..4], f0, .little);
         std.mem.writeInt(u32, out[4..8], f1, .little);
@@ -103,3 +110,4 @@ test "Empty message" {
     poly1305.finalize(&out);
     try std.testing.expectEqualSlices(u8, &expected, &out);
 }
+
